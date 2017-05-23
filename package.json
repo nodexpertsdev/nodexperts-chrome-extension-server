@@ -1,0 +1,30 @@
+{
+  "name": "nodexperts-chrome-extension-server",
+  "version": "1.0.0",
+  "description": "Server for NodeXperts Feed Chrome Extension",
+  "main": "index.js",
+  "scripts": {
+    "start": ". ./creds.sh && node ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mukul <@mukul1904>",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "notifcation",
+    "nodejs",
+    "js",
+    "es6",
+    "serviceworker",
+    "pwa"
+  ],
+  "dependencies": {
+    "express": "^4.15.3",
+    "fcm-push": "^1.1.2",
+    "mongoose": "^4.10.2",
+    "socket.io": "^2.0.1"
+  },
+  "license": "ISC"
+}
