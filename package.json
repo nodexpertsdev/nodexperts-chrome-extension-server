@@ -4,7 +4,8 @@
   "description": "Server for NodeXperts Feed Chrome Extension",
   "main": "index.js",
   "scripts": {
-    "start": ". ./creds.sh && node ./index.js",
+    "start": "node index.js",
+    "dev": ". ./creds.sh && node ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mukul <@mukul1904>",
