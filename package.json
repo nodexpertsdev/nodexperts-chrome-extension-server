@@ -22,9 +22,8 @@
   ],
   "dependencies": {
     "express": "^4.15.3",
-    "fcm-push": "^1.1.2",
     "mongoose": "^4.10.2",
-    "socket.io": "^2.0.1"
+    "node-gcm": "^0.14.6"
   },
   "license": "ISC"
 }

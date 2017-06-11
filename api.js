@@ -2,14 +2,15 @@
 
 const express = require('express');
 const app = express();
-const FCM = require('fcm-push');
 const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
-mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@ds151141.mlab.com:51141/nodexperts-feed`);
+mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@ds151141.mlab.com:${process.env.DB_PORT}/nodexperts-feed`);
 const Feeds = mongoose.model('feeds',
 new Schema({ }),
 'feeds');
 
+/* Express routes */
 app.get('/getFeed', (req, res) => {
   Feeds.find({}).sort({created_at: 'descending'}).exec(function(err, docs) {
     if (err) {
@@ -19,37 +20,49 @@ app.get('/getFeed', (req, res) => {
   });
 });
 
-app.io = require('socket.io')();
+app.get('/sendNot', (req, res) => {
+  var gcm = require('node-gcm');
 
-// [*] Configuring our Socket Connection.
-app.io.on('connection', socket => {
-    console.log('Huston ! we have a new connection ...');
-    socket.on('new_user', (endpoint) => {
-        // [*] TODO: Adding our user notification registration token to our list typically hide it in a secret place. like a DB
-        //           or some secure server because this information is critical to you users.
-    });
+  var message = new gcm.Message({
+      collapseKey: 'demo',
+      priority: 'high',
+      contentAvailable: true,
+      delayWhileIdle: true,
+      timeToLive: 3,
+      data: {
+          key1: 'message1',
+          key2: 'message2'
+      },
+      notification: {
+          title: "Hello, World",
+          icon: "ic_launcher",
+          body: "This is a notification that will be displayed if your app is in the background."
+      }
+  });
 
-    socket.on('pushme', (data) => {
-      var serverKey = '';
-      var fcm = new FCM(process.env.FCM_SERVER_KEY);
-        var message = {
-            to: data.endpoint, // required fill with device token or topics
-            notification: {
-                title: data.payload.title,
-                body: data.payload.body
-            }
-        };
+  // // Change the message data
+  // // ... as key-value
+  // message.addData('key1','message1');
+  // message.addData('key2','message2');
+  //
+  // // ... or as a data object (overwrites previous data object)
+  // message.addData({
+  //     key1: 'message1',
+  //     key2: 'message2'
+  // });
 
-        fcm.send(message)
-            .then(function(response) {
-                //TODO : Implement success mechanism
-            })
-            .catch(function(err) {
-                //TODO : implement error handling mechanism
-            })
-    });
+  // Set up the sender with you API key
+  var sender = new gcm.Sender(process.env.FCM_SERVER_KEY);
 
+  // Add the registration tokens of the devices you want to send to
+  var registrationTokens = [];
+  registrationTokens.push(process.env.TEST_DEVICE_REG_ID);
+
+  sender.send(message, { registrationTokens: registrationTokens }, 2, function(err, response) {
+    if(err) console.error('err', err);
+    else    console.log(response);
+  });
 });
-
+/* Express routes */
 
 module.exports = app
