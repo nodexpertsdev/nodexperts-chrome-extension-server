@@ -11,12 +11,12 @@ new Schema({ }),
 'feeds');
 
 app.get('/getFeed', (req, res) => {
-    Feeds.find({}, function(err, data) {
-      if (err) {
-        return res.send('Server error in getting feeds for NodeXperts');
-      }
-      return res.send(data.splice(0, 5));
-    });
+  Feeds.find({}).sort({created_at: 'descending'}).exec(function(err, docs) {
+    if (err) {
+      return res.send('Server error in getting feeds for NodeXperts');
+    }
+    return res.send(docs.splice(0, 5));
+  });
 });
 
 app.io = require('socket.io')();
