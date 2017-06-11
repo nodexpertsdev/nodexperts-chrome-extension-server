@@ -1,68 +1,52 @@
 'use strict';
 
+const mongoose = require('mongoose');
+const moment = require('moment');
+const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
-const mongoose = require('mongoose');
+const schema = require('./feeds-schema');
+
 mongoose.Promise = global.Promise;
-const Schema = mongoose.Schema;
 mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@ds151141.mlab.com:${process.env.DB_PORT}/nodexperts-feed`);
-const Feeds = mongoose.model('feeds',
-new Schema({ }),
-'feeds');
+
+const Feeds = mongoose.model('feeds', schema, 'feeds');
+
+// configure app to use bodyParser()
+// this will let us get the data from a POST
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 /* Express routes */
-app.get('/getFeed', (req, res) => {
+app.get('/getFeeds', (req, res) => {
   Feeds.find({}).sort({created_at: 'descending'}).exec(function(err, docs) {
     if (err) {
       return res.send('Server error in getting feeds for NodeXperts');
     }
-    return res.send(docs.splice(0, 5));
+    return res.send(docs.splice(0, 20));
   });
 });
 
-app.get('/sendNot', (req, res) => {
-  var gcm = require('node-gcm');
-
-  var message = new gcm.Message({
-      collapseKey: 'demo',
-      priority: 'high',
-      contentAvailable: true,
-      delayWhileIdle: true,
-      timeToLive: 3,
-      data: {
-          key1: 'message1',
-          key2: 'message2'
-      },
-      notification: {
-          title: "Hello, World",
-          icon: "ic_launcher",
-          body: "This is a notification that will be displayed if your app is in the background."
-      }
-  });
-
-  // // Change the message data
-  // // ... as key-value
-  // message.addData('key1','message1');
-  // message.addData('key2','message2');
-  //
-  // // ... or as a data object (overwrites previous data object)
-  // message.addData({
-  //     key1: 'message1',
-  //     key2: 'message2'
-  // });
-
-  // Set up the sender with you API key
-  var sender = new gcm.Sender(process.env.FCM_SERVER_KEY);
-
-  // Add the registration tokens of the devices you want to send to
-  var registrationTokens = [];
-  registrationTokens.push(process.env.TEST_DEVICE_REG_ID);
-
-  sender.send(message, { registrationTokens: registrationTokens }, 2, function(err, response) {
-    if(err) console.error('err', err);
-    else    console.log(response);
+app.get('/checkForFeeds', (req, res) => {
+  Feeds.find({}).sort({ created_at: 'descending' }).exec(function(err, docs) {
+    if (err) {
+      return res.send('Server error in getting feeds for NodeXperts');
+    }
+    const doc = docs[0];
+    if (moment().diff(moment(doc._doc.created_at), 'minutes') < 30) {
+      return res.send(docs[0]);
+    }
+    return res.send(true);
   });
 });
+
+app.post('/createFeed', (req, res) => {
+  Feeds.create(req.body, function (err, data) {
+    if (err) return res.send(err);
+    res.json(data);
+  });
+});
+
 /* Express routes */
 
 module.exports = app

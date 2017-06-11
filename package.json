@@ -10,20 +10,20 @@
   "author": "Mukul <@mukul1904>",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/myke11j/nodexperts-chrome-extension-server"
   },
   "keywords": [
-    "notifcation",
+    "push notifcation",
     "nodejs",
+    "express",
     "js",
-    "es6",
-    "serviceworker",
-    "pwa"
+    "mongoose"
   ],
   "dependencies": {
+    "body-parser": "^1.17.2",
     "express": "^4.15.3",
-    "mongoose": "^4.10.2",
-    "node-gcm": "^0.14.6"
+    "moment": "^2.18.1",
+    "mongoose": "^4.10.2"
   },
   "license": "ISC"
 }
